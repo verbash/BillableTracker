@@ -5,6 +5,26 @@ from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 from datetime import datetime
 
+from calendar import monthrange
+
+def get_billing_period(date, frequency):
+    """Helper function to determine billing period based on frequency"""
+    year = date.year
+    month = date.month
+    if frequency == 'semi-monthly':
+        if date.day <= 15:
+            return (
+                datetime(year, month, 1),
+                datetime(year, month, 15)
+            )
+        else:
+            _, last_day = monthrange(year, month)
+            return (
+                datetime(year, month, 16),
+                datetime(year, month, last_day)
+            )
+    return None  # Handle other frequencies as before
+
 def generate_invoice_pdf(invoice, entries, client):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)

@@ -15,7 +15,7 @@ class Client(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120))
     billing_address = db.Column(db.Text)
-    billing_frequency = db.Column(db.String(20))  # weekly, biweekly, monthly
+    billing_frequency = db.Column(db.String(20))  # weekly, biweekly, monthly, semi-monthly
     rate_per_hour = db.Column(db.Float)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     time_entries = db.relationship('TimeEntry', backref='client', lazy=True)
