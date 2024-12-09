@@ -14,24 +14,81 @@ def dashboard():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        app.logger.debug(f"Login attempt for username: {username}")
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
         
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        if not username or not password:
+            flash('Please fill in both username and password')
+            return render_template('login.html')
+            
+        app.logger.info(f"Login attempt for username: {username}")
         user = User.query.filter_by(username=username).first()
-        if user:
-            app.logger.debug("User found in database")
-            if check_password_hash(user.password_hash, password):
-                app.logger.debug("Password verified successfully")
-                login_user(user)
-                return redirect(url_for('dashboard'))
-            else:
-                app.logger.debug("Password verification failed")
-        else:
-            app.logger.debug("User not found in database")
-        flash('Invalid username or password')
+        
+        if user is None:
+            app.logger.warning(f"No user found with username: {username}")
+            flash('Invalid username or password')
+            return render_template('login.html')
+            
+        if not check_password_hash(user.password_hash, password):
+            app.logger.warning(f"Invalid password for user: {username}")
+            flash('Invalid username or password')
+            return render_template('login.html')
+            
+        login_user(user)
+        app.logger.info(f"Successful login for user: {username}")
+        
+        next_page = request.args.get('next')
+        if not next_page or not next_page.startswith('/'):
+            next_page = url_for('dashboard')
+        return redirect(next_page)
+        
     return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+        
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        if not username or not email or not password:
+            flash('Please fill in all fields')
+            return render_template('register.html')
+            
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists')
+            return render_template('register.html')
+            
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered')
+            return render_template('register.html')
+            
+        user = User(
+            username=username,
+            email=email,
+            password_hash=generate_password_hash(password)
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        app.logger.info(f"New user registered: {username}")
+        flash('Registration successful! Please log in.')
+        return redirect(url_for('login'))
+        
+    return render_template('register.html')
 
 @app.route('/clients', methods=['GET', 'POST'])
 @login_required
