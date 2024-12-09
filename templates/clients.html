@@ -175,25 +175,35 @@
 
 {% block scripts %}
 <script>
-    document.getElementById('generateInvoiceModal').addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const clientId = button.getAttribute('data-client-id');
-        const form = this.querySelector('#invoiceForm');
-        form.action = `/invoices/generate/${clientId}`;
-    });
+    const generateInvoiceModal = document.getElementById('generateInvoiceModal');
+    if (generateInvoiceModal) {
+        generateInvoiceModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const clientId = button.getAttribute('data-client-id');
+            const form = this.querySelector('#invoiceForm');
+            if (form) {
+                form.action = `/invoices/generate/${clientId}`;
+            }
+        });
+    }
 
-    document.getElementById('editClientModal').addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const form = this.querySelector('form');
-        
-        form.elements.client_id.value = button.getAttribute('data-client-id');
-        form.elements.name.value = button.getAttribute('data-client-name');
-        form.elements.email.value = button.getAttribute('data-client-email');
-        form.elements.billing_address.value = button.getAttribute('data-client-billing-address');
-        form.elements.billing_frequency.value = button.getAttribute('data-client-billing-frequency');
-        form.elements.rate_per_hour.value = button.getAttribute('data-client-rate');
-        
-        form.action = `/clients/edit/${button.getAttribute('data-client-id')}`;
-    });
+    const editClientModal = document.getElementById('editClientModal');
+    if (editClientModal) {
+        editClientModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const form = this.querySelector('#editClientForm');
+            
+            if (form && button) {
+                form.elements.client_id.value = button.getAttribute('data-client-id');
+                form.elements.name.value = button.getAttribute('data-client-name');
+                form.elements.email.value = button.getAttribute('data-client-email');
+                form.elements.billing_address.value = button.getAttribute('data-client-billing-address');
+                form.elements.billing_frequency.value = button.getAttribute('data-client-billing-frequency');
+                form.elements.rate_per_hour.value = button.getAttribute('data-client-rate');
+                
+                form.action = `/clients/edit/${button.getAttribute('data-client-id')}`;
+            }
+        });
+    }
 </script>
 {% endblock %}
