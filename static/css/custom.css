@@ -1,0 +1,51 @@
+/* Timer display customization */
+#timer-display {
+    font-family: monospace;
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--bs-primary);
+}
+
+/* Card customizations */
+.card {
+    border: none;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: var(--bs-gray-800);
+    border-bottom: none;
+}
+
+/* Form styling */
+.form-control, .form-select {
+    background-color: var(--bs-gray-800);
+    border: 1px solid var(--bs-gray-700);
+    color: var(--bs-light);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bs-gray-800);
+    border-color: var(--bs-primary);
+    color: var(--bs-light);
+}
+
+/* Button hover effects */
+.btn {
+    transition: transform 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #timer-display {
+        font-size: 2rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+}

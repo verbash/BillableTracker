@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Active Timer</h5>
+            </div>
+            <div class="card-body">
+                <div id="timer-display" class="display-4 text-center mb-3">00:00:00</div>
+                <form id="timer-form" class="mb-3">
+                    <select class="form-select mb-3" name="client_id" required>
+                        <option value="">Select Client</option>
+                        {% for client in current_user.clients %}
+                        <option value="{{ client.id }}">{{ client.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="d-grid gap-2">
+                        <button type="button" id="start-timer" class="btn btn-success">Start Timer</button>
+                        <button type="button" id="stop-timer" class="btn btn-danger" disabled>Stop Timer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Manual Time Entry</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('manual_entry') }}" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Client</label>
+                        <select class="form-select" name="client_id" required>
+                            <option value="">Select Client</option>
+                            {% for client in current_user.clients %}
+                            <option value="{{ client.id }}">{{ client.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Start Time</label>
+                        <input type="datetime-local" class="form-control" name="start_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">End Time</label>
+                        <input type="datetime-local" class="form-control" name="end_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Duration (hours)</label>
+                        <input type="number" step="0.25" class="form-control" name="duration" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" rows="3"></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Save Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+{% endblock %}
