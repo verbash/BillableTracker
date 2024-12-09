@@ -84,14 +84,14 @@
 
 <!-- Add Client Modal -->
 <div class="modal fade" id="addClientModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Add New Client</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="{{ url_for('clients_add') }}">
-                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Client Name</label>
                         <input type="text" class="form-control" name="name" required>
