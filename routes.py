@@ -2,6 +2,7 @@ from flask import render_template, redirect, url_for, request, flash, jsonify, s
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
+import uuid
 from app import app, db
 from models import User, Client, TimeEntry, Invoice
 from helpers import generate_invoice_pdf
@@ -176,7 +177,7 @@ def generate_invoice(client_id):
         end_date=end_date,
         total_hours=total_hours,
         total_amount=total_amount,
-        invoice_number=f"INV-{datetime.utcnow().strftime('%Y%m%d')}-{client_id}"
+        invoice_number=f"INV-{datetime.utcnow().strftime('%Y%m%d')}-{client_id}-{uuid.uuid4().hex[:6].upper()}"
     )
     db.session.add(invoice)
     db.session.commit()
