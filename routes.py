@@ -128,8 +128,11 @@ def edit_client(client_id):
 @app.route('/time/start', methods=['POST'])
 @login_required
 def start_timer():
+    import pytz
+    utc = pytz.UTC
+    
     entry = TimeEntry(
-        start_time=datetime.utcnow(),
+        start_time=datetime.now(utc),
         user_id=current_user.id,
         client_id=request.form['client_id']
     )
@@ -149,13 +152,22 @@ def stop_timer(entry_id):
 @app.route('/time/manual', methods=['POST'])
 @login_required
 def manual_entry():
-    start_time = datetime.strptime(request.form['start_time'], '%Y-%m-%dT%H:%M')
+    import pytz
+    
+    user_tz = pytz.timezone(current_user.timezone)
+    utc = pytz.UTC
+    
+    # Parse the local time and convert to UTC
+    local_start = datetime.strptime(request.form['start_time'], '%Y-%m-%dT%H:%M')
+    start_time = user_tz.localize(local_start).astimezone(utc)
+    
     end_time = None
     duration = float(request.form['duration'])
     
     # Only parse end_time if it's provided and not empty
     if request.form.get('end_time'):
-        end_time = datetime.strptime(request.form['end_time'], '%Y-%m-%dT%H:%M')
+        local_end = datetime.strptime(request.form['end_time'], '%Y-%m-%dT%H:%M')
+        end_time = user_tz.localize(local_end).astimezone(utc)
     
     entry = TimeEntry(
         start_time=start_time,
@@ -216,23 +228,32 @@ def time_entries():
 @app.route('/time/entries')
 @login_required
 def get_time_entries():
+    import pytz
+    
     start_date = request.args.get('start')
     end_date = request.args.get('end')
+    
+    user_tz = pytz.timezone(current_user.timezone)
+    utc = pytz.UTC
     
     query = TimeEntry.query.filter_by(user_id=current_user.id)
     
     if start_date:
-        query = query.filter(TimeEntry.start_time >= datetime.strptime(start_date, '%Y-%m-%d'))
+        local_start = datetime.strptime(start_date, '%Y-%m-%d')
+        utc_start = user_tz.localize(local_start).astimezone(utc)
+        query = query.filter(TimeEntry.start_time >= utc_start)
     if end_date:
-        query = query.filter(TimeEntry.start_time <= datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1))
+        local_end = datetime.strptime(end_date, '%Y-%m-%d')
+        utc_end = user_tz.localize(local_end).astimezone(utc)
+        query = query.filter(TimeEntry.start_time <= utc_end + timedelta(days=1))
     
     entries = query.order_by(TimeEntry.start_time.desc()).all()
     
     return jsonify({
         'entries': [{
             'id': entry.id,
-            'start_time': entry.start_time.isoformat(),
-            'end_time': entry.end_time.isoformat() if entry.end_time else None,
+            'start_time': entry.start_time.replace(tzinfo=utc).astimezone(user_tz).isoformat(),
+            'end_time': entry.end_time.replace(tzinfo=utc).astimezone(user_tz).isoformat() if entry.end_time else None,
             'duration': entry.duration,
             'notes': entry.notes,
             'client_name': entry.client.name
