@@ -101,14 +101,43 @@ def clients():
             billing_address=request.form['billing_address'],
             billing_frequency=request.form['billing_frequency'],
             rate_per_hour=float(request.form['rate_per_hour']),
+            category=request.form.get('category'),
+            status='active',
             user_id=current_user.id
         )
         db.session.add(client)
         db.session.commit()
+        flash('Client added successfully')
         return redirect(url_for('clients'))
     
-    clients = Client.query.filter_by(user_id=current_user.id).all()
-    return render_template('clients.html', clients=clients)
+    # Get filter parameters
+    status = request.args.get('status', '')
+    category = request.args.get('category', '')
+    search = request.args.get('search', '')
+    
+    # Build query
+    query = Client.query.filter_by(user_id=current_user.id)
+    
+    if status:
+        query = query.filter_by(status=status)
+    if category:
+        query = query.filter_by(category=category)
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(Client.name.ilike(search_term) | Client.email.ilike(search_term))
+    
+    clients = query.order_by(Client.name).all()
+    
+    # Get unique categories for filter dropdown
+    categories = db.session.query(Client.category)\
+        .filter(Client.user_id == current_user.id)\
+        .filter(Client.category.isnot(None))\
+        .distinct()\
+        .order_by(Client.category)\
+        .all()
+    categories = [cat[0] for cat in categories if cat[0]]  # Flatten and remove None
+    
+    return render_template('clients.html', clients=clients, categories=categories)
 @app.route('/clients/add', methods=['POST'])
 @login_required
 def clients_add():
@@ -118,6 +147,9 @@ def clients_add():
         billing_address=request.form['billing_address'],
         billing_frequency=request.form['billing_frequency'],
         rate_per_hour=float(request.form['rate_per_hour']),
+        category=request.form.get('category'),
+        status='active',
+        notes=request.form.get('notes'),
         user_id=current_user.id
     )
     db.session.add(client)
@@ -135,6 +167,9 @@ def edit_client(client_id):
     client.billing_address = request.form['billing_address']
     client.billing_frequency = request.form['billing_frequency']
     client.rate_per_hour = float(request.form['rate_per_hour'])
+    client.category = request.form.get('category')
+    client.status = request.form.get('status', 'active')
+    client.notes = request.form.get('notes')
     
     db.session.commit()
     flash('Client updated successfully')

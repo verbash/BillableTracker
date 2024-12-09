@@ -2,11 +2,46 @@
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col">
+    <div class="col-md-8">
         <h2>Clients</h2>
+    </div>
+    <div class="col-md-4 text-end">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">
-            Add New Client
+            <i data-feather="plus"></i> Add New Client
         </button>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form id="filterForm" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="">All</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Category</label>
+                        <select class="form-select" name="category">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category }}">{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Search</label>
+                        <input type="text" class="form-control" name="search" placeholder="Search clients...">
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -81,6 +116,19 @@
                     <div class="mb-3">
                         <label class="form-label">Rate per Hour ($)</label>
                         <input type="number" step="0.01" class="form-control" name="rate_per_hour" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" name="category" list="categories">
+                        <datalist id="categories">
+                            {% for category in categories %}
+                            <option value="{{ category }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

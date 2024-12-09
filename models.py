@@ -22,8 +22,14 @@ class Client(db.Model):
     billing_address = db.Column(db.Text)
     billing_frequency = db.Column(db.String(20))  # weekly, biweekly, monthly, semi-monthly
     rate_per_hour = db.Column(db.Float)
+    status = db.Column(db.String(20), default='active')  # active, inactive, archived
+    category = db.Column(db.String(50))  # For client categorization
+    notes = db.Column(db.Text)  # For any additional client-specific notes
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_billed_at = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     time_entries = db.relationship('TimeEntry', backref='client', lazy=True)
+    invoices = db.relationship('Invoice', backref='client', lazy=True)
 
 class TimeEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
