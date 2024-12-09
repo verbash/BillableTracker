@@ -25,28 +25,61 @@ def get_billing_period(date, frequency):
             )
     return None  # Handle other frequencies as before
 
-def generate_invoice_pdf(invoice, entries, client):
+def generate_invoice_pdf(invoice, entries, client, aggregate_by_day=False):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
     styles = getSampleStyleSheet()
     elements = []
     
-    # Header
+    # Business Information Header
+    if invoice.user.business_name:
+        elements.append(Paragraph(invoice.user.business_name, styles['Heading2']))
+    if invoice.user.business_address:
+        elements.append(Paragraph(invoice.user.business_address, styles['Normal']))
+    if invoice.user.business_email:
+        elements.append(Paragraph(f"Email: {invoice.user.business_email}", styles['Normal']))
+    if invoice.user.business_phone:
+        elements.append(Paragraph(f"Phone: {invoice.user.business_phone}", styles['Normal']))
+    elements.append(Paragraph("<br/><br/>", styles['Normal']))
+    
+    # Invoice Details
     elements.append(Paragraph(f"Invoice #{invoice.invoice_number}", styles['Heading1']))
     elements.append(Paragraph(f"Date: {datetime.utcnow().strftime('%Y-%m-%d')}", styles['Normal']))
     elements.append(Paragraph(f"Client: {client.name}", styles['Normal']))
     elements.append(Paragraph(f"Billing Address: {client.billing_address}", styles['Normal']))
+    elements.append(Paragraph("<br/>", styles['Normal']))
     
     # Time entries table
-    data = [['Date', 'Hours', 'Notes']]
-    for entry in entries:
-        data.append([
-            entry.start_time.strftime('%Y-%m-%d'),
-            f"{entry.duration:.2f}",
-            entry.notes or ''
-        ])
+    if aggregate_by_day:
+        # Aggregate entries by day
+        daily_entries = {}
+        for entry in entries:
+            date = entry.start_time.strftime('%Y-%m-%d')
+            if date not in daily_entries:
+                daily_entries[date] = {'hours': 0, 'notes': []}
+            daily_entries[date]['hours'] += entry.duration
+            if entry.notes:
+                daily_entries[date]['notes'].append(entry.notes)
+        
+        data = [['Date', 'Hours', 'Notes']]
+        for date, info in sorted(daily_entries.items()):
+            data.append([
+                date,
+                f"{info['hours']:.2f}",
+                '; '.join(filter(None, info['notes']))
+            ])
+    else:
+        # Detailed entries
+        data = [['Date', 'Hours', 'Notes']]
+        for entry in entries:
+            data.append([
+                entry.start_time.strftime('%Y-%m-%d'),
+                f"{entry.duration:.2f}",
+                entry.notes or ''
+            ])
     
     # Summary
+    data.append(['', '', ''])
     data.append(['Total Hours:', f"{invoice.total_hours:.2f}", ''])
     data.append(['Rate per Hour:', f"${client.rate_per_hour:.2f}", ''])
     data.append(['Total Amount:', f"${invoice.total_amount:.2f}", ''])

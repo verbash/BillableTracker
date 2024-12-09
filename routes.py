@@ -181,7 +181,10 @@ def generate_invoice(client_id):
     db.session.add(invoice)
     db.session.commit()
     
-    pdf = generate_invoice_pdf(invoice, entries, client)
+    # Get aggregation preference
+    aggregate_by_day = request.form.get('aggregate_by_day') == 'on'
+    
+    pdf = generate_invoice_pdf(invoice, entries, client, aggregate_by_day=aggregate_by_day)
     return send_file(
         io.BytesIO(pdf),
         mimetype='application/pdf',
