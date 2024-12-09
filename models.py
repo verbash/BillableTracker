@@ -7,6 +7,11 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256))
+    timezone = db.Column(db.String(50), default='UTC')
+    business_name = db.Column(db.String(200))
+    business_address = db.Column(db.Text)
+    business_email = db.Column(db.String(120))
+    business_phone = db.Column(db.String(50))
     clients = db.relationship('Client', backref='user', lazy=True)
     time_entries = db.relationship('TimeEntry', backref='user', lazy=True)
 

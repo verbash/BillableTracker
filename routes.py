@@ -219,3 +219,44 @@ def get_time_entries():
             'client_name': entry.client.name
         } for entry in entries]
     })
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    import pytz
+    if request.method == 'POST':
+        current_user.timezone = request.form['timezone']
+        current_user.business_name = request.form['business_name']
+        current_user.business_email = request.form['business_email']
+        current_user.business_phone = request.form['business_phone']
+        current_user.business_address = request.form['business_address']
+        db.session.commit()
+        flash('Settings updated successfully')
+        return redirect(url_for('settings'))
+    
+    timezones = pytz.all_timezones
+    return render_template('settings.html', timezones=timezones)
+
+@app.route('/time/entry/<int:entry_id>')
+@login_required
+def get_time_entry(entry_id):
+    entry = TimeEntry.query.filter_by(id=entry_id, user_id=current_user.id).first_or_404()
+    return jsonify({
+        'id': entry.id,
+        'start_time': entry.start_time.isoformat(),
+        'end_time': entry.end_time.isoformat() if entry.end_time else None,
+        'notes': entry.notes
+    })
+
+@app.route('/time/edit/<int:entry_id>', methods=['POST'])
+@login_required
+def edit_time_entry(entry_id):
+    entry = TimeEntry.query.filter_by(id=entry_id, user_id=current_user.id).first_or_404()
+    
+    entry.start_time = datetime.strptime(request.form['start_time'], '%Y-%m-%dT%H:%M')
+    if request.form.get('end_time'):
+        entry.end_time = datetime.strptime(request.form['end_time'], '%Y-%m-%dT%H:%M')
+        entry.duration = (entry.end_time - entry.start_time).total_seconds() / 3600
+    entry.notes = request.form.get('notes', '')
+    
+    db.session.commit()
+    return jsonify({'success': True})
