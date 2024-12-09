@@ -2,12 +2,10 @@
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col-md-8">
+    <div class="col">
         <h2>Clients</h2>
-    </div>
-    <div class="col-md-4 text-end">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newClientModal">
-            <i data-feather="plus"></i> New Client
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">
+            Add New Client
         </button>
     </div>
 </div>
@@ -20,6 +18,7 @@
                 <h5 class="card-title">{{ client.name }}</h5>
                 <p class="card-text">
                     <strong>Email:</strong> {{ client.email }}<br>
+                    <strong>Address:</strong> {{ client.billing_address }}<br>
                     <strong>Billing Frequency:</strong> {{ client.billing_frequency }}<br>
                     <strong>Rate:</strong> ${{ "%.2f"|format(client.rate_per_hour) }}/hour
                 </p>
@@ -48,15 +47,15 @@
     {% endfor %}
 </div>
 
-<!-- New Client Modal -->
-<div class="modal fade" id="newClientModal" tabindex="-1">
+<!-- Add Client Modal -->
+<div class="modal fade" id="addClientModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">New Client</h5>
+                <h5 class="modal-title">Add New Client</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{{ url_for('clients') }}">
+            <form method="POST" action="{{ url_for('add_client') }}">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Client Name</label>
@@ -86,7 +85,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Client</button>
+                    <button type="submit" class="btn btn-primary">Add Client</button>
                 </div>
             </form>
         </div>
@@ -101,7 +100,7 @@
                 <h5 class="modal-title">Generate Invoice</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="invoiceForm" method="POST">
+            <form method="POST" id="invoiceForm">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Start Date</label>
@@ -113,6 +112,20 @@
                     </div>
                     <div class="mb-3">
                         <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="aggregate_by_day" id="aggregate_by_day">
+                            <label class="form-check-label" for="aggregate_by_day">Aggregate entries by day</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Edit Client Modal -->
 <div class="modal fade" id="editClientModal" tabindex="-1">
     <div class="modal-dialog">
@@ -153,21 +166,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-
-                            <input type="checkbox" class="form-check-input" name="aggregate_by_day" id="aggregate_by_day">
-                            <label class="form-check-label" for="aggregate_by_day">Aggregate entries by day</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Generate PDF</button>
                 </div>
             </form>
         </div>
