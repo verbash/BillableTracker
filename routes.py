@@ -194,3 +194,28 @@ def time_entries():
     entries = TimeEntry.query.filter_by(user_id=current_user.id)\
         .order_by(TimeEntry.start_time.desc()).all()
     return render_template('time_entries.html', entries=entries)
+@app.route('/time/entries')
+@login_required
+def get_time_entries():
+    start_date = request.args.get('start')
+    end_date = request.args.get('end')
+    
+    query = TimeEntry.query.filter_by(user_id=current_user.id)
+    
+    if start_date:
+        query = query.filter(TimeEntry.start_time >= datetime.strptime(start_date, '%Y-%m-%d'))
+    if end_date:
+        query = query.filter(TimeEntry.start_time <= datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1))
+    
+    entries = query.order_by(TimeEntry.start_time.desc()).all()
+    
+    return jsonify({
+        'entries': [{
+            'id': entry.id,
+            'start_time': entry.start_time.isoformat(),
+            'end_time': entry.end_time.isoformat() if entry.end_time else None,
+            'duration': entry.duration,
+            'notes': entry.notes,
+            'client_name': entry.client.name
+        } for entry in entries]
+    })
