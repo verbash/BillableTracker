@@ -53,6 +53,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+function formatDateTime(isoString) {
+    const date = new Date(isoString);
+    const options = {
+        timeZone: userTimezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+}
+
+function formatTime(isoString) {
+    if (!isoString) return '-';
+    const date = new Date(isoString);
+    const options = {
+        timeZone: userTimezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+}
+
+function formatDate(isoString) {
+    const date = new Date(isoString);
+    const options = {
+        timeZone: userTimezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+}
+
 function loadTimeEntries() {
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
@@ -66,14 +103,11 @@ function loadTimeEntries() {
             
             data.entries.forEach(entry => {
                 const row = document.createElement('tr');
-                const startTime = new Date(entry.start_time);
-                const endTime = entry.end_time ? new Date(entry.end_time) : null;
-                
                 row.innerHTML = `
-                    <td>${startTime.toLocaleDateString()}</td>
+                    <td>${formatDate(entry.start_time)}</td>
                     <td>${entry.client_name}</td>
-                    <td>${startTime.toLocaleTimeString()}</td>
-                    <td>${endTime ? endTime.toLocaleTimeString() : '-'}</td>
+                    <td>${formatTime(entry.start_time)}</td>
+                    <td>${formatTime(entry.end_time)}</td>
                     <td>${entry.duration ? entry.duration.toFixed(2) : '-'}</td>
                     <td>${entry.notes || ''}</td>
                     <td>
@@ -104,7 +138,9 @@ function editEntry(entryId) {
             const form = document.getElementById('editEntryForm');
             form.elements.entry_id.value = data.id;
             form.elements.start_time.value = data.start_time.slice(0, 16);
-            form.elements.end_time.value = data.end_time.slice(0, 16);
+            if (data.end_time) {
+                form.elements.end_time.value = data.end_time.slice(0, 16);
+            }
             form.elements.notes.value = data.notes || '';
             
             new bootstrap.Modal(document.getElementById('editEntryModal')).show();

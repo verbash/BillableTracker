@@ -85,5 +85,9 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+    // Pass user timezone to JavaScript
+    const userTimezone = "{{ current_user.timezone }}";
+</script>
 <script src="{{ url_for('static', filename='js/entries.js') }}"></script>
 {% endblock %}

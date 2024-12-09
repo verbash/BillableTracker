@@ -17,6 +17,11 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex align-items-center">
+                    <div id="header-timer-display" class="me-3 d-none">
+                        <span class="badge bg-success">Timer: <span id="global-timer-display">00:00:00</span></span>
+                    </div>
+                </div>
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>

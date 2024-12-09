@@ -109,6 +109,21 @@ def clients():
     
     clients = Client.query.filter_by(user_id=current_user.id).all()
     return render_template('clients.html', clients=clients)
+@app.route('/clients/edit/<int:client_id>', methods=['POST'])
+@login_required
+def edit_client(client_id):
+    client = Client.query.filter_by(id=client_id, user_id=current_user.id).first_or_404()
+    
+    client.name = request.form['name']
+    client.email = request.form['email']
+    client.billing_address = request.form['billing_address']
+    client.billing_frequency = request.form['billing_frequency']
+    client.rate_per_hour = float(request.form['rate_per_hour'])
+    
+    db.session.commit()
+    flash('Client updated successfully')
+    return redirect(url_for('clients'))
+
 
 @app.route('/time/start', methods=['POST'])
 @login_required
