@@ -133,11 +133,19 @@ def stop_timer(entry_id):
 @app.route('/time/manual', methods=['POST'])
 @login_required
 def manual_entry():
+    start_time = datetime.strptime(request.form['start_time'], '%Y-%m-%dT%H:%M')
+    end_time = None
+    duration = float(request.form['duration'])
+    
+    # Only parse end_time if it's provided and not empty
+    if request.form.get('end_time'):
+        end_time = datetime.strptime(request.form['end_time'], '%Y-%m-%dT%H:%M')
+    
     entry = TimeEntry(
-        start_time=datetime.strptime(request.form['start_time'], '%Y-%m-%dT%H:%M'),
-        end_time=datetime.strptime(request.form['end_time'], '%Y-%m-%dT%H:%M'),
-        duration=float(request.form['duration']),
-        notes=request.form['notes'],
+        start_time=start_time,
+        end_time=end_time,
+        duration=duration,
+        notes=request.form.get('notes', ''),
         is_manual=True,
         user_id=current_user.id,
         client_id=request.form['client_id']
