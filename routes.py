@@ -180,3 +180,9 @@ def generate_invoice(client_id):
         as_attachment=True,
         download_name=f"invoice_{invoice.invoice_number}.pdf"
     )
+@app.route('/time_entries')
+@login_required
+def time_entries():
+    entries = TimeEntry.query.filter_by(user_id=current_user.id)\
+        .order_by(TimeEntry.start_time.desc()).all()
+    return render_template('time_entries.html', entries=entries)
