@@ -15,10 +15,21 @@ def dashboard():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.query.filter_by(username=request.form['username']).first()
-        if user and check_password_hash(user.password_hash, request.form['password']):
-            login_user(user)
-            return redirect(url_for('dashboard'))
+        username = request.form['username']
+        password = request.form['password']
+        app.logger.debug(f"Login attempt for username: {username}")
+        
+        user = User.query.filter_by(username=username).first()
+        if user:
+            app.logger.debug("User found in database")
+            if check_password_hash(user.password_hash, password):
+                app.logger.debug("Password verified successfully")
+                login_user(user)
+                return redirect(url_for('dashboard'))
+            else:
+                app.logger.debug("Password verification failed")
+        else:
+            app.logger.debug("User not found in database")
         flash('Invalid username or password')
     return render_template('login.html')
 
